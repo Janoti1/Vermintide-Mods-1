@@ -1,0 +1,11 @@
+mod = [
+	"Draw Patrol Paths"
+]
+
+package = [
+	"resource_packages/Draw Patrol Paths/Draw Patrol Paths"
+]
+
+lua = [
+	"scripts/mods/Draw Patrol Paths/*"
+]
