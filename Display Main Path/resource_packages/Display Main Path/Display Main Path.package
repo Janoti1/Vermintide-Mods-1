@@ -1,0 +1,11 @@
+mod = [
+	"Display Main Path"
+]
+
+package = [
+	"resource_packages/Display Main Path/Display Main Path"
+]
+
+lua = [
+	"scripts/mods/Display Main Path/*"
+]
