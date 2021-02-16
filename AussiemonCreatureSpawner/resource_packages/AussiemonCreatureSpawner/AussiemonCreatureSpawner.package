@@ -1,0 +1,11 @@
+mod = [
+	"AussiemonCreatureSpawner"
+]
+
+package = [
+	"resource_packages/AussiemonCreatureSpawner/AussiemonCreatureSpawner"
+]
+
+lua = [
+	"scripts/mods/AussiemonCreatureSpawner/*"
+]
