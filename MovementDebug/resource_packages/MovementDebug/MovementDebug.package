@@ -1,0 +1,11 @@
+mod = [
+	"MovementDebug"
+]
+
+package = [
+	"resource_packages/MovementDebug/MovementDebug"
+]
+
+lua = [
+	"scripts/mods/MovementDebug/*"
+]

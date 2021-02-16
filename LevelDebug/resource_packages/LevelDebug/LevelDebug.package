@@ -1,0 +1,11 @@
+mod = [
+	"LevelDebug"
+]
+
+package = [
+	"resource_packages/LevelDebug/LevelDebug"
+]
+
+lua = [
+	"scripts/mods/LevelDebug/*"
+]
