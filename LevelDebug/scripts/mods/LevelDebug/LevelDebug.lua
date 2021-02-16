@@ -79,7 +79,8 @@ end
 -- fix errors during load screen after leaving a game
 function mod:on_game_state_changed() 
     enabled = false
-    SAVED_WHERE = nil 
+    SAVED_WHERE = nil
+    TEXT = false 
 end
 
 function mod.drawMainPath()
