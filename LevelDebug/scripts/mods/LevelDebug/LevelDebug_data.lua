@@ -33,7 +33,12 @@ return {
                 setting_id = "where",
                 type = "checkbox",
                 default_value = false
-			},
+            },
+            {
+                setting_id = "named_spawners",
+                type = "checkbox",
+                default_value = false
+            }
         }
     }
 }

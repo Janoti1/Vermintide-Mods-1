@@ -6,6 +6,7 @@ local RESPAWN_DISTANCE = 70
 local END_OF_LEVEL_BUFFER = 35
 local RESPAWN_TIME = 30
 local SAVED_WHERE = nil
+local TEXT = false
 
 local enabled = false
 Development._hardcoded_dev_params.disable_debug_draw = not enabled
@@ -54,6 +55,9 @@ function mod.update()
         if mod:get("respawn") then mod.drawRespawns() end
         if mod:get("player_pos") then mod.drawPosition() end
         if mod:get("where") then mod.drawWhere() end
+        if mod:get("named_spawners") and not TEXT then 
+            mod.drawNamedSpawners() 
+        end
         if SAVED_WHERE then mod.drawSavedWhere() end
 
         if Managers.state.debug then
@@ -67,6 +71,9 @@ end
 function mod:on_setting_changed() 
     QuickDrawer:reset() 
     QuickDrawerStay:reset()
+    local debug_text =  Managers.state.debug_text
+    debug_text:clear_world_text("category: spawner_id")
+    TEXT = false
 end
 
 -- fix errors during load screen after leaving a game
@@ -217,6 +224,21 @@ function mod.drawWhere()
     QuickDrawer:sphere(point + h, .25, Colors.get("yellow"))
 end
 
+function mod.drawNamedSpawners() 
+    local debug_text =  Managers.state.debug_text
+    local spawner_system = Managers.state.entity:system("spawner_system")
+    for event, unitTable in pairs(spawner_system._id_lookup) do 
+        for _,unit in pairs(unitTable) do 
+            local spawner_pos = Unit.local_position(unit, 0)
+            local text_size = 0.5
+            local z = Vector3.up() * 0.5
+            local color_vector = Vector3(255, 0, 200, 0) -- luacheck: ignore
+            debug_text:output_world_text(event, text_size, spawner_pos+z, nil, "category: spawner_id", color_vector)
+        end
+    end
+    TEXT = true  
+end
+
 mod:command("where", "", function()
     local h = Vector3(0, 0, 1)
     local h2 = Vector3(0, 0, .5)
@@ -238,6 +260,8 @@ end)
 mod:command("clearDraw", "", function() 
     QuickDrawer:reset() 
     QuickDrawerStay:reset()
+    local debug_text =  Managers.state.debug_text
+    debug_text:clear_world_text("category: spawner_id")
 end)
 
 function mod.get_respawn_unit()
@@ -322,4 +346,23 @@ function mod.get_respawn_unit()
 
     return selected_unit
 end
+
+-- mod:command("testSpawns", "", function() 
+
+--     local debug_text =  Managers.state.debug_text
+--     local spawner_system = Managers.state.entity:system("spawner_system")
+--     for event, unitTable in pairs(spawner_system._id_lookup) do 
+--         mod:echo(event)
+--         for _,unit in pairs(unitTable) do 
+--             mod:echo(unit)
+--             local spawner_pos = Unit.local_position(unit, 0)
+--             QuickDrawerStay:sphere(spawner_pos, 1, Colors.get("yellow"))
+--             local text_size = 0.5
+--             local z = Vector3.up() * 0.5
+--             local color_vector = Vector3(255, 0, 200, 0) -- luacheck: ignore
+--             debug_text:output_world_text(event, text_size, spawner_pos+z, nil, "category: spawner_id", color_vector)
+--         end
+--     end
+--     mod:dump(spawner_system._id_lookup, "", 1)
+-- end)
 
