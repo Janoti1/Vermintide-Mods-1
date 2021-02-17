@@ -7,6 +7,7 @@ local END_OF_LEVEL_BUFFER = 35
 local RESPAWN_TIME = 30
 local SAVED_WHERE = nil
 local TEXT = false
+local ITEM_TEXT = false
 
 local enabled = false
 Development._hardcoded_dev_params.disable_debug_draw = not enabled
@@ -55,8 +56,11 @@ function mod.update()
         if mod:get("respawn") then mod.drawRespawns() end
         if mod:get("player_pos") then mod.drawPosition() end
         if mod:get("where") then mod.drawWhere() end
-        if mod:get("named_spawners") and not TEXT then 
-            mod.drawNamedSpawners() 
+        if mod:get("named_spawners") and not TEXT then
+            mod.drawNamedSpawners()
+        end
+        if mod:get("item_spawners") and not ITEM_TEXT then
+            mod.drawItemSpawners()
         end
         if SAVED_WHERE then mod.drawSavedWhere() end
 
@@ -68,19 +72,22 @@ function mod.update()
     end
 end
 
-function mod:on_setting_changed() 
-    QuickDrawer:reset() 
+function mod:on_setting_changed()
+    QuickDrawer:reset()
     QuickDrawerStay:reset()
-    local debug_text =  Managers.state.debug_text
+    local debug_text = Managers.state.debug_text
     debug_text:clear_world_text("category: spawner_id")
+    debug_text:clear_world_text("category: item_spawner_id")
     TEXT = false
+    ITEM_TEXT = false
 end
 
 -- fix errors during load screen after leaving a game
-function mod:on_game_state_changed() 
+function mod:on_game_state_changed()
     enabled = false
     SAVED_WHERE = nil
-    TEXT = false 
+    TEXT = false
+    ITEM_TEXT = false
 end
 
 function mod.drawMainPath()
@@ -207,11 +214,11 @@ function mod.drawPosition()
     QuickDrawer:line(point + h, player_pos + h, Colors.get("purple"))
 end
 
-function mod.drawWhere() 
+function mod.drawWhere()
     local h = Vector3(0, 0, 1)
     local h2 = Vector3(0, 0, .5)
     local unit = mod.get_respawn_unit()
-    local pos = Unit.local_position(unit, 0) 
+    local pos = Unit.local_position(unit, 0)
 
     local conflict_director = Managers.state.conflict
     local level_analysis = conflict_director.level_analysis
@@ -225,26 +232,82 @@ function mod.drawWhere()
     QuickDrawer:sphere(point + h, .25, Colors.get("yellow"))
 end
 
-function mod.drawNamedSpawners() 
-    local debug_text =  Managers.state.debug_text
+function mod.drawNamedSpawners()
+    local debug_text = Managers.state.debug_text
     local spawner_system = Managers.state.entity:system("spawner_system")
-    for event, unitTable in pairs(spawner_system._id_lookup) do 
-        for _,unit in pairs(unitTable) do 
+    for event, unitTable in pairs(spawner_system._id_lookup) do
+        for _, unit in pairs(unitTable) do
             local spawner_pos = Unit.local_position(unit, 0)
             local text_size = 0.5
             local z = Vector3.up() * 0.5
             local color_vector = Vector3(255, 0, 200, 0) -- luacheck: ignore
-            debug_text:output_world_text(event, text_size, spawner_pos+z, nil, "category: spawner_id", color_vector)
+            debug_text:output_world_text(event, text_size, spawner_pos + z, nil,
+                                         "category: spawner_id", color_vector)
         end
     end
-    TEXT = true  
+    TEXT = true
+end
+
+function mod.drawItemSpawners() 
+    local debug_text = Managers.state.debug_text
+
+    local text_size = 0.1
+    local z = Vector3.up() * 0.5
+    local color_vector_orange = Vector3(255, 165, 0, 0) 
+    local color_vector_green = Vector3(0, 255, 0, 0)
+    local color_vector_blue = Vector3(0, 0, 255, 0)
+    local color_vector_red = Vector3(255, 0, 0, 0)
+    local color_vector = Vector3(255, 255, 0, 0)
+
+    local pickup_ext = Managers.state.entity:system("pickup_system")
+
+    for _, pickup in pairs(pickup_ext.primary_pickup_spawners) do
+        local spawner_pos = Unit.local_position(pickup, 0)
+        local count = 0
+        for pickup_name, pickup_settings in pairs(AllPickups) do
+            if Unit.get_data(pickup, pickup_name) then
+                local color = color_vector
+                if string.find(pickup_name, "damage_boost") then
+                    color = color_vector_orange
+                elseif string.find(pickup_name, "speed_boost") then
+                    color = color_vector_blue
+                elseif string.find(pickup_name, "healing_draught") or string.find(pickup_name, "first_aid") then 
+                    color = color_vector_green
+                elseif string.find(pickup_name, "grenade") then
+                    color = color_vector_red
+                end
+                debug_text:output_world_text(pickup_name, text_size, spawner_pos + z + Vector3.up() * count * text_size, nil, "category: item_spawner_id", color)
+                count = count + 1
+            end
+        end
+
+        QuickDrawerStay:sphere(spawner_pos, .25, Colors.get("yellow"))
+    end
+
+    -- Shouldn't happen but saving for now
+    -- for _, pickup in pairs(pickup_ext._spawned_pickups) do
+    --     mod:echo(pickup)
+    --     local spawner_pos = Unit.local_position(pickup, 0)
+    --     local canSpawn = ""
+    --     for pickup_name, pickup_settings in pairs(AllPickups) do
+    --         if Unit.get_data(pickup, pickup_name) then
+    --             mod:echo("pickupName")
+    --             canSpawn = canSpawn .. " " ..  pickup_name
+    --         end
+    --     end
+    --     debug_text:output_world_text(canSpawn, text_size, spawner_pos + z, nil,
+    --                                      "category: item_spawner_id", color_vector)
+    --     QuickDrawerStay:sphere(spawner_pos, .25, Colors.get("red"))
+    -- end
+
+    ITEM_TEXT = true
 end
 
 mod:command("where", "", function()
     local h = Vector3(0, 0, 1)
     local h2 = Vector3(0, 0, .5)
     local unit = mod.get_respawn_unit()
-    local pos = Unit.local_position(unit, 0) 
+    local pos = Unit.local_position(unit, 0)
 
     local conflict_director = Managers.state.conflict
     local level_analysis = conflict_director.level_analysis
@@ -256,35 +319,37 @@ mod:command("where", "", function()
     local point = MainPathUtils.point_on_mainpath(nil, ahead_travel_dist)
     QuickDrawerStay:line(point + h, pos + h2, Colors.get("yellow"))
     QuickDrawerStay:sphere(point + h, .25, Colors.get("yellow"))
-end) 
+end)
 
-mod:command("clearDraw", "", function() 
-    QuickDrawer:reset() 
+mod:command("clearDraw", "", function()
+    QuickDrawer:reset()
     QuickDrawerStay:reset()
-    local debug_text =  Managers.state.debug_text
+    local debug_text = Managers.state.debug_text
     debug_text:clear_world_text("category: spawner_id")
+    debug_text:clear_world_text("category: item_spawner_id")
 end)
 
 function mod.get_respawn_unit()
     local respawn_units = Managers.state.spawn.respawn_handler._respawn_units
-	local active_overridden = Managers.state.spawn.respawn_handler._active_overridden_units
+    local active_overridden = Managers.state.spawn.respawn_handler
+                                  ._active_overridden_units
 
-	if next(active_overridden) then
-		for unit, respawn_data in pairs(active_overridden) do
-			if respawn_data.available then
-				respawn_data.available = false
+    if next(active_overridden) then
+        for unit, respawn_data in pairs(active_overridden) do
+            if respawn_data.available then
+                respawn_data.available = false
 
-				return respawn_data.unit
-			end
-		end
+                return respawn_data.unit
+            end
+        end
 
-		print("No available overriden respawning units found!")
+        print("No available overriden respawning units found!")
 
-		return nil
-	end
+        return nil
+    end
 
-	local conflict = Managers.state.conflict
-	local level_analysis = conflict.level_analysis
+    local conflict = Managers.state.conflict
+    local level_analysis = conflict.level_analysis
     local main_paths = level_analysis:get_main_paths()
     local player_unit = Managers.player:local_player().player_unit
 
@@ -296,74 +361,65 @@ function mod.get_respawn_unit()
     local total_travel_dist = main_path_data.total_dist
     local travel_percentage = ahead_travel_dist / total_travel_dist * 100
 
-    local ahead_position = MainPathUtils.point_on_mainpath(nil, ahead_travel_dist)
-	-- local ahead_position = Unit.local_position(player_unit, 0)
+    local ahead_position = MainPathUtils.point_on_mainpath(nil,
+                                                           ahead_travel_dist)
+    -- local ahead_position = Unit.local_position(player_unit, 0)
 
-	if not ahead_position then
-		return
-	end
+    if not ahead_position then return end
 
-	local path_pos, travel_dist = MainPathUtils.closest_pos_at_main_path(main_paths, ahead_position)
-	local total_path_dist = MainPathUtils.total_path_dist()
-	local ahead_pos = MainPathUtils.point_on_mainpath(main_paths, travel_dist + RESPAWN_DISTANCE)
+    local path_pos, travel_dist = MainPathUtils.closest_pos_at_main_path(
+                                      main_paths, ahead_position)
+    local total_path_dist = MainPathUtils.total_path_dist()
+    local ahead_pos = MainPathUtils.point_on_mainpath(main_paths, travel_dist +
+                                                          RESPAWN_DISTANCE)
 
-	if not ahead_pos then
-		print("respawner: far ahead not found, using spawner behind")
+    if not ahead_pos then
+        print("respawner: far ahead not found, using spawner behind")
 
-		ahead_pos = MainPathUtils.point_on_mainpath(main_paths, total_path_dist - END_OF_LEVEL_BUFFER)
+        ahead_pos = MainPathUtils.point_on_mainpath(main_paths,
+                                                    total_path_dist -
+                                                        END_OF_LEVEL_BUFFER)
 
-		fassert(ahead_pos, "Cannot find point on mainpath to respawn cage")
-	end
+        fassert(ahead_pos, "Cannot find point on mainpath to respawn cage")
+    end
 
-	path_pos, travel_dist = MainPathUtils.closest_pos_at_main_path(main_paths, ahead_pos)
-	local num_spawners = #respawn_units
-	local greatest_distance = 0
-	local selected_unit_index = nil
+    path_pos, travel_dist = MainPathUtils.closest_pos_at_main_path(main_paths,
+                                                                   ahead_pos)
+    local num_spawners = #respawn_units
+    local greatest_distance = 0
+    local selected_unit_index = nil
 
-	for i = 1, num_spawners, 1 do
-		local respawn_data = respawn_units[i]
+    for i = 1, num_spawners, 1 do
+        local respawn_data = respawn_units[i]
 
-		if respawn_data.available then
-			local distance_through_level = respawn_data.distance_through_level
+        if respawn_data.available then
+            local distance_through_level = respawn_data.distance_through_level
 
-			if travel_dist <= distance_through_level then
-				selected_unit_index = i
+            if travel_dist <= distance_through_level then
+                selected_unit_index = i
 
-				break
-			elseif greatest_distance < distance_through_level then
-				selected_unit_index = i
-				greatest_distance = distance_through_level
-			end
-		end
-	end
+                break
+            elseif greatest_distance < distance_through_level then
+                selected_unit_index = i
+                greatest_distance = distance_through_level
+            end
+        end
+    end
 
-	if not selected_unit_index then
-		return nil
-	end
+    if not selected_unit_index then return nil end
 
-	local respawn_data = respawn_units[selected_unit_index]
-	local selected_unit = respawn_data.unit
-	-- respawn_data.available = false
+    local respawn_data = respawn_units[selected_unit_index]
+    local selected_unit = respawn_data.unit
+    -- respawn_data.available = false
 
     return selected_unit
 end
 
--- mod:command("testSpawns", "", function() 
 
---     local debug_text =  Managers.state.debug_text
---     local spawner_system = Managers.state.entity:system("spawner_system")
---     for event, unitTable in pairs(spawner_system._id_lookup) do 
---         mod:echo(event)
---         for _,unit in pairs(unitTable) do 
---             mod:echo(unit)
---             local spawner_pos = Unit.local_position(unit, 0)
---             QuickDrawerStay:sphere(spawner_pos, 1, Colors.get("yellow"))
---             local text_size = 0.5
---             local z = Vector3.up() * 0.5
---             local color_vector = Vector3(255, 0, 200, 0) -- luacheck: ignore
---             debug_text:output_world_text(event, text_size, spawner_pos+z, nil, "category: spawner_id", color_vector)
---         end
---     end
---     mod:dump(spawner_system._id_lookup, "", 1)
--- end)
+
+mod:hook(PickupSystem, "populate_pickups", function(func, self, checkpoint_data)
+    mod:echo("[INFO] LevelDebug removed all natural item spawns")
+    return
+end)
+
 

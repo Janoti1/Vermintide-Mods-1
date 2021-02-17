@@ -38,6 +38,11 @@ return {
                 setting_id = "named_spawners",
                 type = "checkbox",
                 default_value = false
+            },
+            {
+                setting_id = "item_spawners",
+                type = "checkbox",
+                default_value = false
             }
         }
     }
