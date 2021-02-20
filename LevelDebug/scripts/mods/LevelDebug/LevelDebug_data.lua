@@ -43,7 +43,17 @@ return {
                 setting_id = "item_spawners",
                 type = "checkbox",
                 default_value = false
-            }
+            },
+            {
+                setting_id      = "check_collision",
+                type            = "keybind",
+                default_value   = { --[[...]] },
+                keybind_global  = true,       -- optional
+                keybind_trigger = "pressed",
+                keybind_type    = "function_call",
+                function_name   = "distToLookingAt",   -- required, if (keybind_type == "function_call")
+                
+              }
         }
     }
 }

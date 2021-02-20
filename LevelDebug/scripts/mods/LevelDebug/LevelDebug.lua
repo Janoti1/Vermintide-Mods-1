@@ -8,6 +8,7 @@ local RESPAWN_TIME = 30
 local SAVED_WHERE = nil
 local TEXT = false
 local ITEM_TEXT = false
+local SPAWNER_DATA = {}
 
 local enabled = false
 Development._hardcoded_dev_params.disable_debug_draw = not enabled
@@ -248,12 +249,12 @@ function mod.drawNamedSpawners()
     TEXT = true
 end
 
-function mod.drawItemSpawners() 
+function mod.drawItemSpawners_old()
     local debug_text = Managers.state.debug_text
 
     local text_size = 0.1
     local z = Vector3.up() * 0.5
-    local color_vector_orange = Vector3(255, 165, 0, 0) 
+    local color_vector_orange = Vector3(255, 165, 0, 0)
     local color_vector_green = Vector3(0, 255, 0, 0)
     local color_vector_blue = Vector3(0, 0, 255, 0)
     local color_vector_red = Vector3(255, 0, 0, 0)
@@ -271,17 +272,109 @@ function mod.drawItemSpawners()
                     color = color_vector_orange
                 elseif string.find(pickup_name, "speed_boost") then
                     color = color_vector_blue
-                elseif string.find(pickup_name, "healing_draught") or string.find(pickup_name, "first_aid") then 
+                elseif string.find(pickup_name, "healing_draught") or
+                    string.find(pickup_name, "first_aid") then
                     color = color_vector_green
                 elseif string.find(pickup_name, "grenade") then
                     color = color_vector_red
                 end
-                debug_text:output_world_text(pickup_name, text_size, spawner_pos + z + Vector3.up() * count * text_size, nil, "category: item_spawner_id", color)
+                debug_text:output_world_text(pickup_name, text_size,
+                                             spawner_pos + z + Vector3.up() *
+                                                 count * text_size, nil,
+                                             "category: item_spawner_id", color)
                 count = count + 1
             end
         end
 
         QuickDrawerStay:sphere(spawner_pos, .25, Colors.get("yellow"))
+    end
+
+    -- Shouldn't happen but saving for now
+    -- for _, pickup in pairs(pickup_ext._spawned_pickups) do
+    --     mod:echo(pickup)
+    --     local spawner_pos = Unit.local_position(pickup, 0)
+    --     local canSpawn = ""
+    --     for pickup_name, pickup_settings in pairs(AllPickups) do
+    --         if Unit.get_data(pickup, pickup_name) then
+    --             mod:echo("pickupName")
+    --             canSpawn = canSpawn .. " " ..  pickup_name
+    --         end
+    --     end
+    --     debug_text:output_world_text(canSpawn, text_size, spawner_pos + z, nil,
+    --                                      "category: item_spawner_id", color_vector)
+    --     QuickDrawerStay:sphere(spawner_pos, .25, Colors.get("red"))
+    -- end
+
+    ITEM_TEXT = true
+end
+
+function mod.drawItemSpawners()
+    local debug_text = Managers.state.debug_text
+
+    local text_size = 0.1
+    local z = Vector3.up() * 0.5
+    local color_vector_orange = Vector3(255, 165, 0, 0)
+    local color_vector_green = Vector3(0, 255, 0, 0)
+    local color_vector_blue = Vector3(0, 0, 255, 0)
+    local color_vector_red = Vector3(255, 0, 0, 0)
+    local color_vector = Vector3(255, 255, 0, 0)
+
+    local pickup_ext = Managers.state.entity:system("pickup_system")
+
+    for spawn_unit, spawner_table in pairs(SPAWNER_DATA) do
+        local spawner_pos = Unit.local_position(spawn_unit, 0)
+        local count = 0
+        -- local pickups = Pickups[pickup_type]
+
+        for _, pickup_info in pairs(spawner_table) do
+            for pickup_name, settings in pairs(Pickups[pickup_info[1]]) do
+                if Unit.get_data(spawn_unit, pickup_name) then
+                    local color = color_vector
+                    if string.find(pickup_name, "damage_boost") then
+                        color = color_vector_orange
+                    elseif string.find(pickup_name, "speed_boost") then
+                        color = color_vector_blue
+                    elseif string.find(pickup_name, "healing_draught") or
+                        string.find(pickup_name, "first_aid") then
+                        color = color_vector_green
+                    elseif string.find(pickup_name, "grenade") then
+                        color = color_vector_red
+                    end
+                    debug_text:output_world_text(tostring(pickup_info[2]) .. " " .. pickup_name, text_size,
+                                                 spawner_pos + z + Vector3.up() *
+                                                     count * text_size, nil,
+                                                 "category: item_spawner_id",
+                                                 color)
+                    count = count + 1
+                end
+
+            end
+            QuickDrawerStay:sphere(spawner_pos, .25, Colors.get("yellow"))
+
+        end
+
+        -- for pickup_name, pickup_settings in pairs(AllPickups) do
+        --     if Unit.get_data(spawn_unit, pickup_name) then
+        --         local color = color_vector
+        --         if string.find(pickup_name, "damage_boost") then
+        --             color = color_vector_orange
+        --         elseif string.find(pickup_name, "speed_boost") then
+        --             color = color_vector_blue
+        --         elseif string.find(pickup_name, "healing_draught") or
+        --             string.find(pickup_name, "first_aid") then
+        --             color = color_vector_green
+        --         elseif string.find(pickup_name, "grenade") then
+        --             color = color_vector_red
+        --         end
+        --         debug_text:output_world_text(pickup_name, text_size,
+        --                                      spawner_pos + z + Vector3.up() *
+        --                                          count * text_size, nil,
+        --                                      "category: item_spawner_id", color)
+        --         count = count + 1
+        --     end
+        -- end
+
+        -- QuickDrawerStay:sphere(spawner_pos, .25, Colors.get("yellow"))
     end
 
     -- Shouldn't happen but saving for now
@@ -415,11 +508,155 @@ function mod.get_respawn_unit()
     return selected_unit
 end
 
-
-
 mod:hook(PickupSystem, "populate_pickups", function(func, self, checkpoint_data)
+    SPAWNER_DATA = {}
+
+    local level_settings = LevelHelper:current_level_settings()
+    local level_pickup_settings = level_settings.pickup_settings
+    if not level_pickup_settings then return end
+
+    local difficulty_manager = Managers.state.difficulty
+    local difficulty_rank = difficulty_manager:get_difficulty_rank()
+    local difficulty = difficulty_manager:get_difficulty()
+    local pickup_settings = level_pickup_settings[difficulty_rank]
+
+    mod:dump(self.primary_pickup_spawners, "", 1)
+    local primary_pickup_spawners = self.primary_pickup_spawners
+    local secondary_pickup_spawners = self.secondary_pickup_spawners
+
+    local function comparator(a, b)
+        local percentage_a = Unit.get_data(a, "percentage_through_level")
+        local percentage_b = Unit.get_data(b, "percentage_through_level")
+
+        fassert(percentage_a,
+                "Level Designer working on %s, You need to rebuild paths (pickup spawners broke)",
+                level_settings.display_name)
+        fassert(percentage_b,
+                "Level Designer working on %s, You need to rebuild paths (pickup spawners broke)",
+                level_settings.display_name)
+
+        return percentage_a < percentage_b
+    end
+
+    local primary_pickup_settings = pickup_settings.primary or pickup_settings
+    mod.fake_spread(primary_pickup_spawners, primary_pickup_settings,
+                    comparator, nil)
     mod:echo("[INFO] LevelDebug removed all natural item spawns")
     return
 end)
 
+mod.fake_spread = function(spawners, pickup_settings, comparator, seed)
+    for pickup_type, value in pairs(pickup_settings) do  
+        local num_sections = value
+        local section_size = 1 / num_sections
+        local section_start_point = 0
+        local section_end_point = 0
+
+        for i = 1, num_sections, 1 do
+            local num_pickup_spawners = #spawners
+            section_end_point = section_start_point + section_size
+
+            for j = 1, num_pickup_spawners, 1 do
+                local spawner_unit = spawners[j]
+                local percentage_through_level =
+                    Unit.get_data(spawner_unit, "percentage_through_level")
+
+                if (section_start_point <= percentage_through_level and
+                    percentage_through_level < section_end_point) or
+                    (num_sections == i and percentage_through_level == 1) then
+                    if not SPAWNER_DATA[spawner_unit] then
+                        SPAWNER_DATA[spawner_unit] = {}
+                    end
+                    table.insert(SPAWNER_DATA[spawner_unit],
+                                 {pickup_type, i})
+                end
+            end
+            section_start_point = section_end_point
+        end
+    end
+end
+
+mod:command("sectionId", "", function() mod:dump(SPAWNER_DATA, "", 3) end)
+
+mod.distToLookingAt = function()
+    local player_manager = Managers.player
+    local local_player = player_manager:local_player()
+    local player_unit = local_player and local_player.player_unit
+    local current_position = Unit.local_position(player_unit, 0)
+    mod:position_at_cursor(local_player)
+
+end
+
+mod.position_at_cursor = function(self, local_player)
+    local viewport_name = local_player.viewport_name
+
+    local camera_position = Managers.state.camera:camera_position(viewport_name)
+    local camera_rotation = Managers.state.camera:camera_rotation(viewport_name)
+    local camera_direction = Quaternion.forward(camera_rotation)
+    local range = 500
+
+    local world = Managers.world:world("level_world")
+    local physics_world = World.get_data(world, "physics_world")
+
+    local new_position
+
+    local num_shots_this_frame = 15
+
+    local angle = math.pi / 80
+    local outer_angle = 0
+
+    local outer_number = 1
+
+    for j = 1, outer_number, 1 do
+        local rotation = camera_rotation
+        local rotation2 = camera_rotation
+        for i = 1, num_shots_this_frame, 1 do
+            rotation = mod.get_rotation(0, angle, 0, rotation)
+            rotation2 = mod.get_rotation(0, -1 * angle, 0, rotation2)
+            local direction = Quaternion.forward(rotation)
+            local is_hit, hit_pos, hit_dist, hit_norm, hit_actor =
+                PhysicsWorld.immediate_raycast(physics_world, camera_position,
+                                               direction, range, "closest",
+                                               "collision_filter",
+                                               "filter_player_mover")
+
+            if is_hit then
+
+                QuickDrawerStay:circle(hit_pos, 0.1, hit_norm, Colors.get("red"))
+                QuickDrawerStay:vector(hit_pos, 0.1 * hit_norm,
+                                       Colors.get("red"))
+            end
+
+            direction = Quaternion.forward(rotation2)
+            is_hit, hit_pos, hit_dist, hit_norm, hit_actor =
+                PhysicsWorld.immediate_raycast(physics_world, camera_position,
+                                               direction, range, "closest",
+                                               "collision_filter",
+                                               "filter_player_mover")
+
+            if is_hit then
+
+                QuickDrawerStay:circle(hit_pos, 0.1, hit_norm, Colors.get("red"))
+                QuickDrawerStay:vector(hit_pos, 0.1 * hit_norm,
+                                       Colors.get("red"))
+            end
+        end
+        outer_angle = outer_angle + angle
+    end
+
+    return new_position
+end
+
+mod.get_rotation = function(roll, pitch, yaw, current_rotation)
+
+    local roll_rot = Quaternion(Vector3.forward(), roll)
+    local pitch_rot = Quaternion(Vector3.up(), pitch)
+    local yaw_rot = Quaternion(Vector3.right(), yaw)
+
+    local combined_rotation = Quaternion.multiply(current_rotation, roll_rot)
+    combined_rotation = Quaternion.multiply(combined_rotation, pitch_rot)
+    combined_rotation = Quaternion.multiply(combined_rotation, yaw_rot)
+
+    return combined_rotation
+end
 
