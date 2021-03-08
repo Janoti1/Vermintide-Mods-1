@@ -1,0 +1,11 @@
+mod = [
+	"FixRestartSoundBug"
+]
+
+package = [
+	"resource_packages/FixRestartSoundBug/FixRestartSoundBug"
+]
+
+lua = [
+	"scripts/mods/FixRestartSoundBug/*"
+]
