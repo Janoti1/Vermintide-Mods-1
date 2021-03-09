@@ -1,0 +1,11 @@
+mod = [
+	"ConflagVortex"
+]
+
+package = [
+	"resource_packages/ConflagVortex/ConflagVortex"
+]
+
+lua = [
+	"scripts/mods/ConflagVortex/*"
+]
