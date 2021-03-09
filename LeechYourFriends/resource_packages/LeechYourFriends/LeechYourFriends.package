@@ -1,0 +1,11 @@
+mod = [
+	"LeechYourFriends"
+]
+
+package = [
+	"resource_packages/LeechYourFriends/LeechYourFriends"
+]
+
+lua = [
+	"scripts/mods/LeechYourFriends/*"
+]
