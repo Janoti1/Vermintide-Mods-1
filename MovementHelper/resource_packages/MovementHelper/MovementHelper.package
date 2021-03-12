@@ -1,0 +1,11 @@
+mod = [
+	"MovementHelper"
+]
+
+package = [
+	"resource_packages/MovementHelper/MovementHelper"
+]
+
+lua = [
+	"scripts/mods/MovementHelper/*"
+]
