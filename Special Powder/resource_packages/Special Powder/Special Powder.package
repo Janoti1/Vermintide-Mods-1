@@ -1,0 +1,11 @@
+mod = [
+	"Special Powder"
+]
+
+package = [
+	"resource_packages/Special Powder/Special Powder"
+]
+
+lua = [
+	"scripts/mods/Special Powder/*"
+]
