@@ -1,0 +1,11 @@
+mod = [
+	"Grappling Gun"
+]
+
+package = [
+	"resource_packages/Grappling Gun/Grappling Gun"
+]
+
+lua = [
+	"scripts/mods/Grappling Gun/*"
+]
