@@ -1,0 +1,23 @@
+mod = [
+	"SaltsGlaive"
+]
+
+package = [
+	"resource_packages/SaltsGlaive/SaltsGlaive"
+]
+
+lua = [
+	"scripts/mods/SaltsGlaive/*"
+]
+
+unit = [
+  "units/mods/SaltsGlaive/*"
+]
+
+material = [
+  "materials/mods/SaltsGlaive/*"
+]  
+
+texture = [
+  "textures/mods/SaltsGlaive/*"
+] 

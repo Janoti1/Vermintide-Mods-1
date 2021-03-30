@@ -1,0 +1,58 @@
+materials = {
+	Metal_2 = "materials/mods/SaltsGlaive/Metal_1p"
+	Metal_15 = "materials/mods/SaltsGlaive/Metal_1p"
+	blade_1 = "materials/mods/SaltsGlaive/Metal_1p"
+	Metal_3 = "materials/mods/SaltsGlaive/Metal_1p"
+	staff_1 = "materials/mods/SaltsGlaive/Wood_Dark_Material_1p"
+
+}
+ 
+renderables = {
+	Glaive = {
+		always_keep = false
+		culling = "bounding_volume"
+		generate_uv_unwrap = false
+		occluder = false
+		shadow_caster = true
+		surface_queries = false
+		viewport_visible = true
+	}
+	counterweight_5 = {
+		always_keep = false
+		culling = "bounding_volume"
+		generate_uv_unwrap = false
+		occluder = false
+		shadow_caster = true
+		surface_queries = false
+		viewport_visible = true
+	}
+	spearhead_3 = {
+		always_keep = false
+		culling = "bounding_volume"
+		generate_uv_unwrap = false
+		occluder = false
+		shadow_caster = true
+		surface_queries = false
+		viewport_visible = true
+	}
+	mount_3 = {
+		always_keep = false
+		culling = "bounding_volume"
+		generate_uv_unwrap = false
+		occluder = false
+		shadow_caster = true
+		surface_queries = false
+		viewport_visible = true
+	}
+	staff_5 = {
+		always_keep = false
+		culling = "bounding_volume"
+		generate_uv_unwrap = false
+		occluder = false
+		shadow_caster = true
+		surface_queries = false
+		viewport_visible = true
+	}
+	
+
+}  
