@@ -9,3 +9,14 @@ package = [
 lua = [
 	"scripts/mods/ExampleCustomUnit/*"
 ]
+unit = [
+  "units/*"
+]
+
+material = [
+  "materials/*"
+]  
+
+texture = [
+  "textures/*"
+] 
