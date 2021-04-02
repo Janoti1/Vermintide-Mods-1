@@ -153,4 +153,30 @@ end)
 - In game `/testModel` 
 - Take a couple steps forward and turn around
 ![](./readmeImages/final.png)
- 
+
+- **Note:** Reloading mods while the model is rendered will cause a crash
+
+## Adding Physics
+
+- Create a file named `<name-of-fbx.physics>` in your units folder
+- Add the following lines to it
+```
+actors = [
+	{
+		enabled = true
+		mass = 0
+		name = "Cube"
+		node = "Cube"
+		shapes = [
+			{
+				material = "default"
+				shape = "Cube"
+				template = "default"
+				type = "mesh"
+			}
+		]
+		template = "static"
+	}
+]
+```
+ - Now when you spawn in your unit it will have collision
