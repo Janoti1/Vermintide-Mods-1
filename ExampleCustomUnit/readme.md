@@ -1,5 +1,7 @@
 # Example Custom Unit
 
+Huge credit to Raindish for paving the way and figuring this all out.
+
 ## Preparing Workspace
 - In order to compile units and textures you need to be on the latest branch of the verm sdk in steam. Right click on the SDK in steam, select properties, on the window that pops up select betas, and then select latest in the dropdown. ![](./readmeImages/beta.PNG)
 
