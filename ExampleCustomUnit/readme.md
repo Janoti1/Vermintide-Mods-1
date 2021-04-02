@@ -98,7 +98,7 @@ variables = {
 	}
 }
  ```
-- Note: there are may possible options for this, but this is just supposed to be a simple example
+- Note: there are many possible options for this, but this is just supposed to be a simple example
 ## Create Unit File
  - In the units folder, create a file named `<name-of-fbx.unit>`
  - Place the following lines of text in that file note that the material and renderable names are the same as in blender. 
