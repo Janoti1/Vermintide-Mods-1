@@ -1,7 +1,7 @@
 # Example Custom Unit
 
 ## Preparing Workspace
-- In order to compile units and textures you need to be on the latest branch of the verm sdk in steam. Right click on the SDK in steam, select properties, on the window that pops up select betas, and then select latest in the dropdown. ![](./readmeImages/beta.png)
+- In order to compile units and textures you need to be on the latest branch of the verm sdk in steam. Right click on the SDK in steam, select properties, on the window that pops up select betas, and then select latest in the dropdown. ![](./readmeImages/beta.PNG)
 
 - Create your new mod as you normally would. Once you create the new mod you will need to move some files over from the SDK. Replace the core file in your mod with the one in the sdk and put the preprocessor config in the root of your mod.
 ![](./readmeImages/sdkFiles.png)
@@ -35,7 +35,7 @@ texture = [
 * Open up blender
 * Export the cube model as an .fbx file and save it in the units folder
 * Take note of the renderables name and the material name as they will be used in the unit file
-![](./readmeImages/blender.png)
+![](./readmeImages/blender.PNG)
 
 ## Create Material File 
  - In the material folder you created create a file called `yellow.material`, and paste the following text in it
