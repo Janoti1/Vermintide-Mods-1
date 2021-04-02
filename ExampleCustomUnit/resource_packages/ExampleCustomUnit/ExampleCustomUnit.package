@@ -1,0 +1,11 @@
+mod = [
+	"ExampleCustomUnit"
+]
+
+package = [
+	"resource_packages/ExampleCustomUnit/ExampleCustomUnit"
+]
+
+lua = [
+	"scripts/mods/ExampleCustomUnit/*"
+]
