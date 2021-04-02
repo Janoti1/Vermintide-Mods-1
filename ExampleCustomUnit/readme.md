@@ -180,3 +180,100 @@ actors = [
 ]
 ```
  - Now when you spawn in your unit it will have collision
+
+## Adding Textures
+- For this one we are going to add a colormap and normal map.
+- In the textures folder create 2 files `wood_basecolor.texture` and `wood_normal.texture` 
+- Paste the following lines in both the files
+- Change the `filename` in `wood_normal.texture` 
+```
+common = {
+  input = {
+    filename = "textures/wood_basecolor"
+  }
+
+  output = {
+    format = "DXT5"
+    apply_processing = true
+    enable_cut_alpha_threshold = true
+    cut_alpha_threshold = 0.5
+    mipmap_filter = "kaiser"
+    mipmap_filter_wrap_mode = "mirror"
+    mipmap_keep_original = false
+    mipmap_num_largest_steps_to_discard = 0
+    mipmap_num_smallest_steps_to_discard = 0
+    srgb = true
+    streamable = true
+  }
+} 
+```
+- Copy the png files from my textures folder into yours
+- In the material folder, create a new filed named `textured.material`
+- Paste this in that file
+```
+parent_material = "core/stingray_renderer/shader_import/standard"
+textures = {
+    color_map = "textures/wood_basecolor"
+	normal_map = "textures/wood_normal"
+}
+material_contexts = {
+	surface_material = ""
+}
+variables = {
+	base_color = {
+		type = "vector3"
+		value = [
+			0
+			0
+			0
+		]
+	}
+	emissive = {
+		type = "vector3"
+		value = [
+			0
+			0
+			0
+		]
+	}
+	emissive_intensity = {
+		type = "scalar"
+		value = 1
+	}
+	metallic = {
+		type = "scalar"
+		value = 0
+	}
+	roughness = {
+		type = "scalar"
+		value = 0.8
+	}
+	use_ao_map = {
+		type = "scalar"
+		value = 0
+	}
+	use_color_map = {
+		type = "scalar"
+		value = 1
+	}
+	use_emissive_map = {
+		type = "scalar"
+		value = 0
+	}
+	use_metallic_map = {
+		type = "scalar"
+		value = 0
+	}
+	use_normal_map = {
+		type = "scalar"
+		value = 1
+	}
+	use_roughness_map = {
+		type = "scalar"
+		value = 0
+	}
+} 
+```
+- Reading through this you will see this enable the color and normal map
+- Change the material in your unit file to use this new texture `Material = "materials/textured"`
+![](./readmeImages/textured.png)

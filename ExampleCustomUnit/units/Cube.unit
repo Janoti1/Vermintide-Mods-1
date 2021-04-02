@@ -1,5 +1,5 @@
 materials = {
-	Material = "materials/yellow"
+	Material = "materials/textured"
 }
  
 renderables = {
