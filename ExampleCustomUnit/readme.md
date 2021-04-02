@@ -275,5 +275,5 @@ variables = {
 } 
 ```
 - Reading through this you will see this enable the color and normal map
-- Change the material in your unit file to use this new texture `Material = "materials/textured"`
+- Change the material in your unit file to use this new textured material `Material = "materials/textured"`
 ![](./readmeImages/textured.png)
