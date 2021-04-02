@@ -2,6 +2,8 @@
 
 This documentation would not have been possible without [raindish](https://steamcommunity.com/id/raindish/) paving the way and figuring this all out.
 
+For any questions please join the modding [discord](https://discord.gg/EJ8uNxzyV8)
+
 ## Preparing Workspace
 - In order to compile units and textures you need to be on the latest branch of the verm sdk in steam. Right click on the SDK in steam, select properties, on the window that pops up select betas, and then select latest in the dropdown. ![](./readmeImages/beta.PNG)
 
