@@ -1,0 +1,11 @@
+mod = [
+	"LeechDebug"
+]
+
+package = [
+	"resource_packages/LeechDebug/LeechDebug"
+]
+
+lua = [
+	"scripts/mods/LeechDebug/*"
+]
