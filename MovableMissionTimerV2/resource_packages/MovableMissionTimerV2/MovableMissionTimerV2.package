@@ -1,0 +1,11 @@
+mod = [
+	"MovableMissionTimerV2"
+]
+
+package = [
+	"resource_packages/MovableMissionTimerV2/MovableMissionTimerV2"
+]
+
+lua = [
+	"scripts/mods/MovableMissionTimerV2/*"
+]
