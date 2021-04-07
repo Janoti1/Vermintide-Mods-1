@@ -29,13 +29,13 @@ mod:hook(WeaponUnitExtension, "start_action", function(func, self, action_name, 
 
         local local_player = Managers.player:local_player()
         local player_unit = local_player.player_unit
-        local movement_table =
-            PlayerUnitMovementSettings.get_movement_settings_table(player_unit)
-        if movement_table then
-            movement_table.gravity_acceleration = backupGravity
-            movement_table.move_acceleration_down = backupAccel
+        -- local movement_table =
+        --     PlayerUnitMovementSettings.get_movement_settings_table(player_unit)
+        -- if movement_table then
+        --     movement_table.gravity_acceleration = backupGravity
+        --     movement_table.move_acceleration_down = backupAccel
             
-        end
+        -- end
         
         attached = not attached
 
@@ -91,15 +91,15 @@ function mod.grapple()
                 local player_pos = Unit.local_position(player_unit, 0)
                 local vect = hit_pos - player_pos
 
-                local movement_table =
-                    PlayerUnitMovementSettings.get_movement_settings_table(
-                        player_unit)
-                if movement_table then
-                    backupGravity = movement_table.gravity_acceleration
-                    backupAccel = movement_table.move_acceleration_down
-                    movement_table.move_acceleration_down = 0
-                    movement_table.gravity_acceleration = 0
-                end
+                -- local movement_table =
+                --     PlayerUnitMovementSettings.get_movement_settings_table(
+                --         player_unit)
+                -- if movement_table then
+                --     backupGravity = movement_table.gravity_acceleration
+                --     backupAccel = movement_table.move_acceleration_down
+                --     movement_table.move_acceleration_down = 0
+                --     movement_table.gravity_acceleration = 0
+                -- end 
 
                 local locomotion_extension =
                     ScriptUnit.has_extension(player_unit,
