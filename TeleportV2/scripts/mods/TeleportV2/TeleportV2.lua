@@ -1,0 +1,90 @@
+local mod = get_mod("TeleportV2")
+
+mod.getTeleport = function ()
+	local player = Managers.player:local_player(1)
+	local player_pos = Unit.local_position(player.player_unit, 0)
+	local camera_position = Managers.state.camera:camera_position(player.viewport_name)
+	local camera_rotation = Managers.state.camera:camera_rotation(player.viewport_name)
+	local camera_direction = Quaternion.forward(camera_rotation)
+	local world = Managers.world:world("level_world")
+	local physics_world = World.get_data(world, "physics_world")
+	local result = PhysicsWorld.immediate_raycast(physics_world, camera_position, camera_direction, 500, "all", "collision_filter", "filter_ray_horde_spawn")
+
+	if result then
+		local num_hits = #result
+
+		for i = 1, num_hits, 1 do
+			local hit = result[i]
+			local hit_actor = hit[4]
+			local hit_unit = Actor.unit(hit_actor)
+			local attack_hit_self = hit_unit == player.player_unit
+
+			if not attack_hit_self then
+				mod.teleport(hit[1] - player_pos)
+
+				break
+			end
+		end
+	end
+
+	return 
+end
+mod.teleport = function (direction)
+	local player = Managers.player:local_player(1)
+	local camera_rotation = Managers.state.camera:camera_rotation(player.viewport_name)
+	local player_unit = Managers.player:local_player(1).player_unit
+	local pos = Unit.local_position(player_unit, 0) + direction
+	local rot = Unit.local_rotation(player_unit, 0)
+	local locomotion_extension = ScriptUnit.extension(player_unit, "locomotion_system")
+
+	locomotion_extension.teleport_to(locomotion_extension, pos, camera_rotation)
+
+	return 
+end
+
+mod:command("toPortal", "", function() 
+
+    if string.find(Managers.state.game_mode._level_key, "inn_level") then
+        local player = Managers.player:local_player(1)
+        local camera_rotation = Managers.state.camera:camera_rotation(player.viewport_name)
+        local player_unit = Managers.player:local_player(1).player_unit
+        local pos = Vector3(19.11,-1.75,4.32) 
+        local rot = Unit.local_rotation(player_unit, 0)
+        local locomotion_extension = ScriptUnit.extension(player_unit, "locomotion_system")
+
+        locomotion_extension.teleport_to(locomotion_extension, pos, camera_rotation)
+    end
+
+    
+
+end)
+
+mod:command("toMe", "", function()
+    local player = Managers.player:local_player(1)
+    local player_unit = Managers.player:local_player(1).player_unit
+    local position = Unit.local_position(player_unit, 0)
+
+    local human_players = Managers.player:human_players()
+    local network_manager = Managers.state.network
+    for _, player in pairs(human_players) do
+        pcall(function()
+            if not player.local_player then
+                unit_id =
+                    network_manager:unit_game_object_id(player.player_unit)
+                if unit_id then
+                    local locomotion_extension =
+                        ScriptUnit.extension(player.player_unit,
+                                             "locomotion_system")
+                    local rotation = Unit.local_rotation(player.player_unit, 0)
+                    network_manager.network_transmit:send_rpc_clients(
+                        "rpc_teleport_unit_to", unit_id, position, rotation)
+                        
+                    locomotion_extension:teleport_to(position, rotation)
+                end
+            end
+        end)
+    end
+end)
+
+-- Your mod code goes here.
+-- https://vmf-docs.verminti.de
