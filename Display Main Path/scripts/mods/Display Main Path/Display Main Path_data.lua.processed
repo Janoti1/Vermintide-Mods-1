@@ -47,17 +47,10 @@ return {
             {
                 setting_id = "item_text_mult",
                 type = "numeric",
-                default_value = 0.1,
-                range = {0.01, 1},
-				decimals_number = 2
-			},
-            {
-                setting_id = "text_distance",
-                type = "numeric",
-                default_value = 20,
-                range = {1, 1000},
+                default_value = 13,
+                range = {1, 500},
 				decimals_number = 0
-			},
+			}
             {
 				keybind_global = true,
 				keybind_trigger = "pressed",
