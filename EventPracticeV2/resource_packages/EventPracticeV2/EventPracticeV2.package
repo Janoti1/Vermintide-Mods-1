@@ -1,0 +1,11 @@
+mod = [
+	"EventPracticeV2"
+]
+
+package = [
+	"resource_packages/EventPracticeV2/EventPracticeV2"
+]
+
+lua = [
+	"scripts/mods/EventPracticeV2/*"
+]
