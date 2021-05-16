@@ -1,0 +1,11 @@
+mod = [
+	"DialoguePlayer"
+]
+
+package = [
+	"resource_packages/DialoguePlayer/DialoguePlayer"
+]
+
+lua = [
+	"scripts/mods/DialoguePlayer/*"
+]
