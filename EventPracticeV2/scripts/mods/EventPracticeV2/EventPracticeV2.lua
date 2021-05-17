@@ -13,11 +13,11 @@ local tpLocations = {
 	["farmlands"] = { {-97.762825, 177.131104, 12.798241} },
     ["ussingen"] = {{-57.144, -13.573, 20.4699}},
 	["nurgle"] = { {-349.687347, 82.144646, 2.094658} },
-	["warcamp"] = { {196.783051, -83.824829, 41.218258} },
+	["warcamp"] = { {178.934387, 185.609863, 17.929544}, {196.783051, -83.824829, 41.218258} },
 	["skittergate"] = { {269.836914, 481.523315, -15.362812},{127.629379, 334.292572, 9.914454},{86.662849, 258.085327, 2.516365} },
 	["dlc_portals"] = { {-180.810928, 158.701874, -47.748112}, {134.208405, 0.551237, 23.295654}},
-	["dlc_bastion"] = { {62.586346, 45.888699, -26.140110},{41.785767, 53.660053, 12.333536}},
-	["dlc_castle"] = { {-14.880340, 40.515175, -4.000000}, {-14.880340, 40.515175, -4.000000}},
+	["dlc_bastion"] = { {62.586346, 45.888699, -26.140110},{41.785767, 53.660053, 12.333536}, {94.329514, -35.620724, -3.632232}},
+	["dlc_castle"] = { {1.113668, 14.898329, 0.161701}, {6.948763, 325.470917, 25.262688}},
     ["dlc_bogenhafen_slum"] = {{-56.9376, 151.794, 18.0222}},
 	["dlc_bogenhafen_city"] = { {-54.977257, 132.112473, 3.967742}, {52.560699, 223.172287, 82.015915} },
     ["magnus"] = {{-3.72264, -5.23273, 1.3351}, {244.977, -152.234, 96.2738}},
@@ -25,7 +25,7 @@ local tpLocations = {
 	["forest_ambush"] = { {252.697388, -178.306717, 17.580149}, {498.607941, 28.460766, 0.098653} },
 	["crater"] = { {-106.578682, 152.847824, -15.573997} }
 }
-
+ 
 local NDX = 0
 local TABLE_CLEARED = false
 local pl = require'pl.import_into'()
@@ -319,6 +319,7 @@ end)
 
 mod:hook_safe(HordeSpawner, "execute_ambush_horde", function(self, extra_data, side_id, fallback, override_epicenter_pos, optional_data)
     if not mod:get("composition") then return end
+	mod:echo(extra_data.sound_settings) 
     print("setting up ambush-horde")
 
 	local settings = CurrentHordeSettings.ambush
@@ -482,4 +483,5 @@ mod.debugPacing = function(t, dt)
 
 	ScriptGUI.irect(gui, res_x, res_y, win_x, win_y, win_x + width, row, 2, Color(100, 10, 10, 10))
 end 
+
 

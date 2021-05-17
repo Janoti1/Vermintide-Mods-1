@@ -1,0 +1,11 @@
+mod = [
+	"InvincibleBots"
+]
+
+package = [
+	"resource_packages/InvincibleBots/InvincibleBots"
+]
+
+lua = [
+	"scripts/mods/InvincibleBots/*"
+]
