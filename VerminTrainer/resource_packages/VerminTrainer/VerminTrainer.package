@@ -1,0 +1,11 @@
+mod = [
+	"VerminTrainer"
+]
+
+package = [
+	"resource_packages/VerminTrainer/VerminTrainer"
+]
+
+lua = [
+	"scripts/mods/VerminTrainer/*"
+]
