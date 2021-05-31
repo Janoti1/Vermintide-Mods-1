@@ -1,0 +1,11 @@
+mod = [
+	"SeedTesting"
+]
+
+package = [
+	"resource_packages/SeedTesting/SeedTesting"
+]
+
+lua = [
+	"scripts/mods/SeedTesting/*"
+]
