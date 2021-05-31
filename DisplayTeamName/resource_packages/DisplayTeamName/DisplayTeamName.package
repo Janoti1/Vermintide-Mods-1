@@ -1,0 +1,11 @@
+mod = [
+	"DisplayTeamName"
+]
+
+package = [
+	"resource_packages/DisplayTeamName/DisplayTeamName"
+]
+
+lua = [
+	"scripts/mods/DisplayTeamName/*"
+]
