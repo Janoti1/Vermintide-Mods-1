@@ -1,0 +1,11 @@
+mod = [
+	"Shade Adjust"
+]
+
+package = [
+	"resource_packages/Shade Adjust/Shade Adjust"
+]
+
+lua = [
+	"scripts/mods/Shade Adjust/*"
+]
