@@ -19,6 +19,8 @@ end
 function ExampleUI.open(self)
     self._is_open = true
     Imgui.open_imgui()
+    -- Enable this if you need to accept inputs (mouse/keyboard)
+    -- self:release_input()
 end
 
 function ExampleUI.capture_input()
@@ -48,6 +50,7 @@ end
 function ExampleUI.close(self)
     self._is_open = false
     Imgui.close_imgui()
+    -- Enable this if you enable capture_input
     -- self:release_input()
 end
 
