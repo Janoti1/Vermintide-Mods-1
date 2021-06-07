@@ -6,7 +6,10 @@ local mod = get_mod("BasicImguiExample")
 local ExampleUI = mod:dofile("scripts/mods/BasicImguiExample/ui/ExampleUI")
 mod.example_ui = ExampleUI:new()
 
+-- This function is referenced in the _data.lua file as a keybind
+-- See: https://vmf-docs.verminti.de/#/widgets?id=keybind
 function mod.open_imgui()
+	-- _is_open is some internal state to the UI class
 	if mod.example_ui._is_open then
 		mod.example_ui:close()
 	else
@@ -14,6 +17,8 @@ function mod.open_imgui()
 	end
 end
 
+-- mod.update is a function VMF calls every game tick
+-- See: https://vmf-docs.verminti.de/#/events?id=update
 function mod.update()
     if mod.example_ui and mod.example_ui._is_open then
         mod.example_ui:draw()
@@ -33,7 +38,3 @@ mod:hook_safe(IngameHud, "update", function(self)
     mod.position = Vector3Box(Unit.local_position(player_unit, 0))
 
 end)
-  
-
--- Your mod code goes here.
--- https://vmf-docs.verminti.de
