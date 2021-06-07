@@ -1,0 +1,11 @@
+mod = [
+	"BasicImguiExample"
+]
+
+package = [
+	"resource_packages/BasicImguiExample/BasicImguiExample"
+]
+
+lua = [
+	"scripts/mods/BasicImguiExample/*"
+]
