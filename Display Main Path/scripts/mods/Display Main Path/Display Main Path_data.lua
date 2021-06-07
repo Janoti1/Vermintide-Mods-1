@@ -59,6 +59,11 @@ return {
 				decimals_number = 0
 			},
             {
+                setting_id = "debug_spawners",
+                type = "checkbox",
+                default_value = false
+            },
+            {
 				keybind_global = true,
 				keybind_trigger = "pressed",
 				setting_id = "check_collision",
@@ -66,7 +71,12 @@ return {
 				keybind_type = "function_call",
 				function_name = "checkCollision",
 				default_value = {}
-			}
+			},
+            {
+                setting_id = "nav_mesh",
+                type = "checkbox",
+                default_value = false
+            }
         }
     }
-}
+} 
