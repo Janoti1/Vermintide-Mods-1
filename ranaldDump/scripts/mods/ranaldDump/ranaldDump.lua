@@ -1,7 +1,7 @@
 local mod = get_mod("ranaldDump")
 
 local locale_code = Application.user_setting("language_id")
-local out_dir = "C:\\Users\\Craven\\Dev\\Dump\\"
+local out_dir = os.getenv("HOMEDRIVE") .. os.getenv("HOMEPATH") .. "\\Desktop\\"
 
 local heroOrder = {
   [1] = "es_mercenary",
@@ -304,6 +304,51 @@ mod:command("traits", "", function()
   file:close() 
   mod:dump(WeaponTraits.combinations, "", 2)
 end) 
+
+mod:command("properties", "", function() 
+  local file = io.open(string.format("%s%s", out_dir, "properties.js"),"w+")
+  file:write("export const propertiesData = {\n")
+
+  for k,v in pairs(WeaponProperties.combinations) do 
+    -- file:write("\t{\n")
+    file:write(string.format("\t\t\"%s\": { \n", k))
+    mod:echo(k)
+    local properties = {}
+    for _,combos in pairs(v.unique) do 
+      for _,props in pairs(combos) do
+        if not properties[props] then
+          local propertyInfo = WeaponProperties.properties[props]
+          mod:echo("%s", Localize(propertyInfo.display_name))
+          mod:echo("%s", Localize(propertyInfo.advanced_description))
+          local description, advanced_description = UIUtils.get_property_description(props, 0)
+          mod:echo("%s", description)
+          mod:echo("%s", advanced_description)
+          mod:echo("%s", Localize(propertyInfo.advanced_description))
+          -- mod:echo("%s", UIUtils.format_localized_description(propertyInfo.advanced_description, 100))
+          properties[props] = {name=description, range=advanced_description, description=Localize(propertyInfo.advanced_description)}
+
+          -- properties[props] = {name=Localize(propertyInfo.display_name), description=string.format("%s",UIUtils.format_localized_description(propertyInfo.advanced_description, propertyInfo.description_values))}
+        end 
+      end
+    end
+
+    for prop,typeProps in pairs(properties) do 
+      file:write(string.format("\t\t\t\"%s\": { \n", prop))
+      -- file:write(string.format("\t\t\t\t\"name\": \"%s\", \n", typeProps.name:gsub( "[0-9+.%%]","" )))
+      file:write(string.format("\t\t\t\t\"name\": \"%s\", \n", typeProps.name:gsub( "%s*+[0-9.]+%%*%s*","" )))
+      file:write(string.format("\t\t\t\t\"description\": \"%s\", \n", typeProps.description))
+      file:write(string.format("\t\t\t\t\"range\": \"%s\", \n", typeProps.range:gsub( "%s+[(]+","(" )))
+      file:write("\t\t\t},\n")
+      mod:dump(typeProps, k, 3)
+    end 
+    file:write(string.format("\t\t},\n"))
+    -- file:write("\t},\n")
+  end
+  file:write("\n]")
+  file:close() 
+
+end)
+  
+
+
  
-
-

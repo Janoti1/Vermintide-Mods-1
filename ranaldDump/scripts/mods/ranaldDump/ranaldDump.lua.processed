@@ -1,7 +1,7 @@
 local mod = get_mod("ranaldDump")
 
 local locale_code = Application.user_setting("language_id")
-local out_dir = "C:\\Users\\Craven\\Dev\\Dump\\"
+local out_dir = os.getenv("HOMEDRIVE") .. os.getenv("HOMEPATH") .. "\\Desktop\\"
 
 local heroOrder = {
   [1] = "es_mercenary",
@@ -231,7 +231,7 @@ end
 
 mod:command("weapons", "", function() 
   local file = io.open(string.format("%s%s", out_dir, "weapons.js"),"w+")
-  file:write("[\n")
+  file:write("export const weaponsData = [\n")
   for k, v in pairs(ItemMasterList) do 
     local type = v.slot_type
     if (type == "ranged" or type == "melee") and not string.find(k, "magic") and not string.find(k, "career_skill")then 
@@ -239,8 +239,8 @@ mod:command("weapons", "", function()
       file:write("\t{\n")
       file:write(string.format("\t\t\"name\": \"%s\", \n", Localize(k)))
       file:write(string.format("\t\t\"codeName\": \"%s\", \n", k))
-      file:write(string.format("\t\t\"description\": \"%s\", \n", Localize(v.description)))
-      file:write(string.format("\t\t\"tooltip\": \"%s\", \n", table.concat( weapon_template.tooltip_keywords, ", ")))
+      file:write(string.format("\t\t\"flavorText\": \"%s\", \n", Localize(v.description)))
+      file:write(string.format("\t\t\"description\": \"%s\", \n", table.concat( weapon_template.tooltip_keywords, ", ")))
       local localizedTooltips = {}
       for _,tip in pairs(weapon_template.tooltip_keywords) do 
         table.insert( localizedTooltips, Localize(tip))
@@ -252,49 +252,103 @@ mod:command("weapons", "", function()
       file:write(string.format("\t\t\"blockInnerCost\": \"%s\", \n", weapon_template.block_fatigue_point_multiplier))
       file:write(string.format("\t\t\"blockOuterCost\": \"%s\", \n", weapon_template.outer_block_fatigue_point_multiplier))
       file:write(string.format("\t\t\"blockAngle\": \"%s\", \n", weapon_template.block_angle))
-      file:write(string.format("\t\t\"canWield\": \"%s\", \n", table.concat(v.can_wield, ", ")))
+      -- file:write(string.format("\t\t\"canWield\": \"%s\", \n", table.concat(v.can_wield, ", ")))
       if (type == "melee") then
-        file:write(string.format("\t\t\"canWieldPrimary\": \"%s\", \n", table.concat(v.can_wield, ", ")))
+        file:write(string.format("\t\t\"canWieldPrimary\": [\"%s\"], \n", table.concat(v.can_wield, "\", \"")))
         if (mod.charCanWield(v.can_wield, "dr_slayer") or mod.charCanWield(v.can_wield, "es_questingknight")) then
-          local char = mod.getCharCanWield()
-          file:write(string.format("\t\t\"canWieldSecondary\": \"%s\", \n", ))
+          local char = mod.getCharCanWield(v.can_wield)
+          file:write(string.format("\t\t\"canWieldSecondary\": [\"%s\"], \n", char))
+        else
+          file:write("\t\t\"canWieldSecondary\": [], \n")
         end
       else 
-        mod:echo('no')
+        file:write("\t\t\"canWieldPrimary\": [], \n")
+        file:write(string.format("\t\t\"canWieldSecondary\": [\"%s\"], \n", table.concat(v.can_wield, "\", \"")))
       end
+      file:write(string.format("\t\t\"traitCategory\": \"%s\", \n", type))
+      file:write(string.format("\t\t\"propertyCategory\": \"%s\", \n", type))
       file:write("\t},\n")
-
-      -- file:write(string.format("%s\t\"cooldown\": \"%s\"\n", depth, heroData["skill"]["cooldown"]))
-       
-      mod:echo(k)
-      mod:echo(Localize(k))
-      mod:echo(Localize(v.description))
-      for _,class in pairs(v.can_wield) do 
-        mod:echo("%s", class)
-      end
-      local weapon_template = Weapons[v.template]
-      -- mod:dump(weapon_template, "", 5)
-      mod:echo("dodge_count:%s",weapon_template.dodge_count)
-      mod:echo("block_angle:%s",weapon_template.block_angle)
-      mod:echo("max_fatigue_points:%s",weapon_template.max_fatigue_points)
-      -- mod:echo(":%s",weapon_template.)
-      -- mod:echo(":%s",weapon_template.)
     end
-          
-  
-    -- if not string.find(k, "skin") and not string.find(k, "hat") and not string.find(k, "deed") and not string.find(k, "frame")then
-    --   mod:echo(k)
-    -- end
-    -- if string.find(k, "1h_sword") then
-    --   if k.unit then
-    --     mod:echo("SEEEEEEEEEEEEETTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    --     k.unit = unit_path
-    --   end
-    -- end
   end
   file:write("\n]")
   file:close() 
 end) 
+
+mod:command("traits", "", function() 
+  local file = io.open(string.format("%s%s", out_dir, "traits.js"),"w+")
+  file:write("export const traitData = [\n")
+  for k,v in pairs(WeaponTraits.combinations) do 
+    file:write("\t{\n")
+    file:write(string.format("\t\t\"%s\": [ \n", k))
+    
+    local traits = {}
+    for _,whyfatshark in pairs(v) do 
+      file:write("\t\t\t{\n")
+      for _,trait in pairs(whyfatshark) do 
+        file:write(string.format("\t\t\t\t\"codeName\": \"%s\", \n", trait))
+        mod:echo(trait)
+        local traitInfo = WeaponTraits.traits[trait]
+        file:write(string.format("\t\t\t\t\"name\": \"%s\", \n", Localize(traitInfo.display_name)))
+        file:write(string.format("\t\t\t\t\"name\": \"%s\", \n", UIUtils.format_localized_description(traitInfo.advanced_description, traitInfo.description_values)))
+        mod:echo(Localize(traitInfo.display_name))
+        mod:echo("%s", UIUtils.format_localized_description(traitInfo.advanced_description, traitInfo.description_values))
+
+      end
+      file:write("\t\t\t},\n")
+    end
+    
+    file:write("\t\t],\n")
+    file:write("\t},\n")
+  end
+  file:write("\n]")
+  file:close() 
+  mod:dump(WeaponTraits.combinations, "", 2)
+end) 
+
+mod:command("properties", "", function() 
+  local file = io.open(string.format("%s%s", out_dir, "properties.js"),"w+")
+  file:write("export const propertiesData = [\n")
+
+  for k,v in pairs(WeaponProperties.combinations) do 
+    file:write("\t{\n")
+    file:write(string.format("\t\t\"%s\": [ \n", k))
+    mod:echo(k)
+    local properties = {}
+    for _,combos in pairs(v.unique) do 
+      for _,props in pairs(combos) do
+        if not properties[props] then
+          local propertyInfo = WeaponProperties.properties[props]
+          mod:echo("%s", Localize(propertyInfo.display_name))
+          mod:echo("%s", Localize(propertyInfo.advanced_description))
+          local description, advanced_description = UIUtils.get_property_description(props, 0)
+          mod:echo("%s", description)
+          mod:echo("%s", advanced_description)
+          mod:echo("%s", Localize(propertyInfo.advanced_description))
+          -- mod:echo("%s", UIUtils.format_localized_description(propertyInfo.advanced_description, 100))
+          properties[props] = {name=description, range=advanced_description, description=Localize(propertyInfo.advanced_description)}
+
+          -- properties[props] = {name=Localize(propertyInfo.display_name), description=string.format("%s",UIUtils.format_localized_description(propertyInfo.advanced_description, propertyInfo.description_values))}
+        end 
+      end
+    end
+
+    for prop,typeProps in pairs(properties) do 
+      file:write("\t\t\t{\n")
+      file:write(string.format("\t\t\t\t\"codename\": \"%s\", \n", prop))
+      -- file:write(string.format("\t\t\t\t\"name\": \"%s\", \n", typeProps.name:gsub( "[0-9+.%%]","" )))
+      file:write(string.format("\t\t\t\t\"name\": \"%s\", \n", typeProps.name:gsub( "+[0-9].*%%\s*","" )))
+      file:write(string.format("\t\t\t\t\"description\": \"%s\", \n", typeProps.description))
+      file:write(string.format("\t\t\t\t\"range\": \"%s\", \n", typeProps.range))
+      file:write("\t\t\t},\n")
+      mod:dump(typeProps, k, 3)
+    end 
+    file:write("\t},\n")
+  end
+  file:write("\n]")
+  file:close() 
+
+end)
+  
+
+
  
-
-
