@@ -273,6 +273,37 @@ mod:command("weapons", "", function()
   file:write("\n]")
   file:close() 
 end) 
+
+mod:command("traits", "", function() 
+  local file = io.open(string.format("%s%s", out_dir, "traits.js"),"w+")
+  file:write("export const traitData = [\n")
+  for k,v in pairs(WeaponTraits.combinations) do 
+    file:write("\t{\n")
+    file:write(string.format("\t\t\"%s\": [ \n", k))
+    
+    local traits = {}
+    for _,whyfatshark in pairs(v) do 
+      file:write("\t\t\t{\n")
+      for _,trait in pairs(whyfatshark) do 
+        file:write(string.format("\t\t\t\t\"codeName\": \"%s\", \n", trait))
+        mod:echo(trait)
+        local traitInfo = WeaponTraits.traits[trait]
+        file:write(string.format("\t\t\t\t\"name\": \"%s\", \n", Localize(traitInfo.display_name)))
+        file:write(string.format("\t\t\t\t\"name\": \"%s\", \n", UIUtils.format_localized_description(traitInfo.advanced_description, traitInfo.description_values)))
+        mod:echo(Localize(traitInfo.display_name))
+        mod:echo("%s", UIUtils.format_localized_description(traitInfo.advanced_description, traitInfo.description_values))
+
+      end
+      file:write("\t\t\t},\n")
+    end
+    
+    file:write("\t\t],\n")
+    file:write("\t},\n")
+  end
+  file:write("\n]")
+  file:close() 
+  mod:dump(WeaponTraits.combinations, "", 2)
+end) 
  
 
 
