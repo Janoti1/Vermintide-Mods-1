@@ -212,9 +212,26 @@ mod:command("heroes", " Dump Hero Info", function(filePath)
   file:close() 
 end)
 
+mod.charCanWield = function(canWield, char)
+  for _,v in pairs(canWield) do
+    if (v == char) then 
+      return true
+    end
+  end
+  return false
+end
+
+mod.getCharCanWield = function(canWield)
+  for _,v in pairs(canWield) do
+    if (v == "dr_slayer" or v == "es_questingknight") then 
+      return v
+    end
+  end
+end
+
 mod:command("weapons", "", function() 
   local file = io.open(string.format("%s%s", out_dir, "weapons.js"),"w+")
-  file:write("[\n")
+  file:write("export const weaponsData = [\n")
   for k, v in pairs(ItemMasterList) do 
     local type = v.slot_type
     if (type == "ranged" or type == "melee") and not string.find(k, "magic") and not string.find(k, "career_skill")then 
@@ -222,8 +239,8 @@ mod:command("weapons", "", function()
       file:write("\t{\n")
       file:write(string.format("\t\t\"name\": \"%s\", \n", Localize(k)))
       file:write(string.format("\t\t\"codeName\": \"%s\", \n", k))
-      file:write(string.format("\t\t\"description\": \"%s\", \n", Localize(v.description)))
-      file:write(string.format("\t\t\"tooltip\": \"%s\", \n", table.concat( weapon_template.tooltip_keywords, ", ")))
+      file:write(string.format("\t\t\"flavorText\": \"%s\", \n", Localize(v.description)))
+      file:write(string.format("\t\t\"description\": \"%s\", \n", table.concat( weapon_template.tooltip_keywords, ", ")))
       local localizedTooltips = {}
       for _,tip in pairs(weapon_template.tooltip_keywords) do 
         table.insert( localizedTooltips, Localize(tip))
@@ -235,40 +252,27 @@ mod:command("weapons", "", function()
       file:write(string.format("\t\t\"blockInnerCost\": \"%s\", \n", weapon_template.block_fatigue_point_multiplier))
       file:write(string.format("\t\t\"blockOuterCost\": \"%s\", \n", weapon_template.outer_block_fatigue_point_multiplier))
       file:write(string.format("\t\t\"blockAngle\": \"%s\", \n", weapon_template.block_angle))
-      file:write(string.format("\t\t\"canWield\": \"%s\", \n", table.concat(v.can_wield, ", ")))
-      file:write("\t},\n")
-
-      -- file:write(string.format("%s\t\"cooldown\": \"%s\"\n", depth, heroData["skill"]["cooldown"]))
-       
-      mod:echo(k)
-      mod:echo(Localize(k))
-      mod:echo(Localize(v.description))
-      for _,class in pairs(v.can_wield) do 
-        mod:echo("%s", class)
+      -- file:write(string.format("\t\t\"canWield\": \"%s\", \n", table.concat(v.can_wield, ", ")))
+      if (type == "melee") then
+        file:write(string.format("\t\t\"canWieldPrimary\": [\"%s\"], \n", table.concat(v.can_wield, "\", \"")))
+        if (mod.charCanWield(v.can_wield, "dr_slayer") or mod.charCanWield(v.can_wield, "es_questingknight")) then
+          local char = mod.getCharCanWield(v.can_wield)
+          file:write(string.format("\t\t\"canWieldSecondary\": [\"%s\"], \n", char))
+        else
+          file:write("\t\t\"canWieldSecondary\": [], \n")
+        end
+      else 
+        file:write("\t\t\"canWieldPrimary\": [], \n")
+        file:write(string.format("\t\t\"canWieldSecondary\": [\"%s\"], \n", table.concat(v.can_wield, "\", \"")))
       end
-      local weapon_template = Weapons[v.template]
-      mod:dump(weapon_template, "", 3)
-      mod:echo("dodge_count:%s",weapon_template.dodge_count)
-      mod:echo("block_angle:%s",weapon_template.block_angle)
-      mod:echo("max_fatigue_points:%s",weapon_template.max_fatigue_points)
-      -- mod:echo(":%s",weapon_template.)
-      -- mod:echo(":%s",weapon_template.)
+      file:write(string.format("\t\t\"traitCategory\": \"%s\", \n", type))
+      file:write(string.format("\t\t\"propertyCategory\": \"%s\", \n", type))
+      file:write("\t},\n")
     end
-          
-  
-    -- if not string.find(k, "skin") and not string.find(k, "hat") and not string.find(k, "deed") and not string.find(k, "frame")then
-    --   mod:echo(k)
-    -- end
-    -- if string.find(k, "1h_sword") then
-    --   if k.unit then
-    --     mod:echo("SEEEEEEEEEEEEETTING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    --     k.unit = unit_path
-    --   end
-    -- end
   end
   file:write("\n]")
   file:close() 
 end) 
-
+ 
 
 
