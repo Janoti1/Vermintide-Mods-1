@@ -140,6 +140,8 @@ mod:command("heroes", " Dump Hero Info", function()
 end)
 
 mod.heroes = function()
+  local fileName = "Heroes.js"
+  mod:echo("Exporting data to: %s", fileName)
   talentDescriptions = getTalentDescription()
 
   local heroInfo = {}
@@ -188,7 +190,7 @@ mod.heroes = function()
       
     end 
 
-    local file = io.open(string.format("%s%s", out_dir, "Heroes.js"),"w+")
+    local file = io.open(string.format("%s%s", out_dir, fileName),"w+")
     file:write("export const heroesData = {\n")
     for class, data in pairs(heroInfo) do 
       file:write(string.format( "\t\"%s\": { \n", class))
@@ -222,7 +224,9 @@ mod:command("weapons", "", function()
 end) 
 
 mod.weapons = function() 
-  local file = io.open(string.format("%s%s", out_dir, "weapons.js"),"w+")
+  local fileName = "weapons.js"
+  mod:echo("Exporting data to: %s", fileName)
+  local file = io.open(string.format("%s%s", out_dir, fileName),"w+")
   file:write("export const weaponsData = {\n")
   for k, v in pairs(ItemMasterList) do 
     local type = v.slot_type
@@ -279,7 +283,9 @@ mod:command("traits", "", function()
 end) 
 
 mod.traits = function() 
-  local file = io.open(string.format("%s%s", out_dir, "traits.js"),"w+")
+  local fileName = "traits.js"
+  mod:echo("Exporting data to: %s", fileName)
+  local file = io.open(string.format("%s%s", out_dir, fileName),"w+")
   file:write("export const traitData = {\n")
   for k,v in pairs(WeaponTraits.combinations) do 
     -- file:write("\t{\n")
@@ -311,7 +317,9 @@ mod:command("properties", "", function()
 end)
 
 mod.properties = function() 
-  local file = io.open(string.format("%s%s", out_dir, "properties.js"),"w+")
+  local fileName = "properties.js"
+  mod:echo("Exporting data to: %s", fileName)
+  local file = io.open(string.format("%s%s", out_dir, fileName),"w+")
   file:write("export const propertiesData = {\n")
 
   for k,v in pairs(WeaponProperties.combinations) do 
@@ -342,7 +350,7 @@ mod.properties = function()
 end
 
 mod:command("exportRanalds", "", function()
-  mod:echo("Exporting data to: %s", out_dir)
+  mod:echo("Exporting location: %s", out_dir)
   mod.heroes()
   mod.weapons()
   mod.traits() 
