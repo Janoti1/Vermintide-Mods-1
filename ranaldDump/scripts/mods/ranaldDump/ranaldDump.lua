@@ -107,19 +107,12 @@ local function writeTalents(file, depth, talents)
   file:write(string.format("%s]\n", depth))
 end
 
-local function writeHero(file, id, heroData)
+
+local function writeHero(file, heroData)
   local depth = "\t\t"
-  file:write("\t{\n")
   
-  -- Missing hero
-  if heroData == nil then
-    file:write(string.format("%s\"id\": %d\n", depth, id))
-    file:write("\t}")
-    return
-  end
 
   -- TODO: fix heroName
-  file:write(string.format("%s\"id\": %d,\n", depth, heroData["id"]))
   file:write(string.format("%s\"name\": \"%s\",\n", depth, heroData["name"]))
   file:write(string.format("%s\"codeName\": \"%s\",\n", depth, heroData["codeName"]))
   file:write(string.format("%s\"heroName\": \"%s\",\n", depth, heroData["name"]))
@@ -140,48 +133,46 @@ local function writeHero(file, id, heroData)
   -- talents
   writeTalents(file, depth, heroData["talents"])
 
-  file:write("\t}")
 end
 
-mod:command("heroes", " Dump Hero Info", function(filePath) 
-  if filePath then
-    out_dir = filePath
-  end
+mod:command("heroes", " Dump Hero Info", function() 
+  mod.heroes()
+end)
 
+mod.heroes = function()
   talentDescriptions = getTalentDescription()
 
   local heroInfo = {}
   
-  for name, settings in pairs(CareerSettings) do 
-    if heroId[name] ~= nil then 
-      local career = {}
-      career["id"] = heroId[name]
-      career["name"] = Localize(name)
-      career["codeName"] = name
-      career["health"] = settings.attributes.max_hp
-      career["passive"] = {
-        name = Localize(settings.passive_ability.display_name),
-        description = Localize(settings.passive_ability.description)
+  for name, settings in pairs(CareerSettings) do  
+    local career = {}
+    career["name"] = Localize(name)
+    career["codeName"] = name
+    career["health"] = settings.attributes.max_hp
+    career["passive"] = {
+      name = Localize(settings.passive_ability.display_name),
+      description = Localize(settings.passive_ability.description)
+    }
+    career["skill"] = {
+      name = Localize(settings.activated_ability[1].display_name),
+      description = Localize(settings.activated_ability[1].description),
+      cooldown = settings.activated_ability[1].cooldown
+    }
+    perks = {} 
+    local numPerks = #settings.passive_ability.perks
+    for i = 1, numPerks, 1 do
+      perks[i] = {
+        name = Localize(settings.passive_ability.perks[i].display_name),
+        description = Localize(settings.passive_ability.perks[i].description)
       }
-      career["skill"] = {
-        name = Localize(settings.activated_ability[1].display_name),
-        description = Localize(settings.activated_ability[1].description),
-        cooldown = settings.activated_ability[1].cooldown
-      }
-      perks = {} 
-      local numPerks = #settings.passive_ability.perks
-      for i = 1, numPerks, 1 do
-        perks[i] = {
-          name = Localize(settings.passive_ability.perks[i].display_name),
-          description = Localize(settings.passive_ability.perks[i].description)
-        }
-      end
+    end
 
-      career["perks"] = perks
+    career["perks"] = perks
 
 
-      local count = 1
-      local allTalents = {}
+    local count = 1
+    local allTalents = {}
+    if (TalentTrees[settings.profile_name][settings.talent_tree_index]) then
       for row,talents in pairs(TalentTrees[settings.profile_name][settings.talent_tree_index]) do 
         for _,talent in pairs(talents) do 
           allTalents[count] = {
@@ -194,24 +185,21 @@ mod:command("heroes", " Dump Hero Info", function(filePath)
 
       career["talents"] = allTalents
       heroInfo[name] = career
-    end
-    
-  end 
+      
+    end 
 
-  local file = io.open(string.format("%s%s", out_dir, "Heroes.js"),"w+")
-  file:write("export const heroesData = [\n")
-  local numHeroes = #heroOrder
-  for i = 1, numHeroes, 1 do
-    writeHero(file, heroId[heroOrder[i]], heroInfo[heroOrder[i]])
-    if i ~= numHeroes then
-      file:write(",\n")
+    local file = io.open(string.format("%s%s", out_dir, "Heroes.js"),"w+")
+    file:write("export const heroesData = {\n")
+    for class, data in pairs(heroInfo) do 
+      file:write(string.format( "\t\"%s\": { \n", class))
+      writeHero(file, data)
+      file:write(string.format( "\t}, \n"))
     end
+    file:write("}")
+    file:close() 
   end
-
-  file:write("\n]")
-  file:close() 
-end)
-
+end
+ 
 mod.charCanWield = function(canWield, char)
   for _,v in pairs(canWield) do
     if (v == char) then 
@@ -230,6 +218,10 @@ mod.getCharCanWield = function(canWield)
 end
 
 mod:command("weapons", "", function() 
+  mod.weapons()
+end) 
+
+mod.weapons = function() 
   local file = io.open(string.format("%s%s", out_dir, "weapons.js"),"w+")
   file:write("export const weaponsData = {\n")
   for k, v in pairs(ItemMasterList) do 
@@ -249,12 +241,12 @@ mod:command("weapons", "", function()
       file:write(string.format("\t\t\t\"tooltipLocalized\": \"%s\", \n", table.concat( localizedTooltips, ", ")))
       file:write(string.format("\t\t\t\"dodgeDistance\": \"%s\", \n", weapon_template.buffs.change_dodge_distance.external_optional_multiplier))
       file:write(string.format("\t\t\t\"dodgeSpeed\": \"%s\", \n", weapon_template.buffs.change_dodge_speed.external_optional_multiplier))
-      file:write(string.format("\t\t\t\"stamina\": \"%s\", \n", weapon_template.dodge_count))
+      file:write(string.format("\t\t\t\"dodgeCount\": \"%s\", \n", weapon_template.dodge_count))
+      file:write(string.format("\t\t\t\"stamina\": \"%s\", \n", weapon_template.max_fatigue_points))
       file:write(string.format("\t\t\t\"blockInnerCost\": \"%s\", \n", weapon_template.block_fatigue_point_multiplier))
       file:write(string.format("\t\t\t\"blockOuterCost\": \"%s\", \n", weapon_template.outer_block_fatigue_point_multiplier))
       file:write(string.format("\t\t\t\"blockAngle\": \"%s\", \n", weapon_template.block_angle))
       local actionTwo = weapon_template.actions.action_two.default
-      mod:dump(actionTwo.buff_data, "", 2)
       if (actionTwo.buff_data) then 
         file:write(string.format("\t\t\t\"rightClickMovementModifier\": \"%.2f\", \n", actionTwo.buff_data[1].external_multiplier))
       else 
@@ -280,9 +272,13 @@ mod:command("weapons", "", function()
   end
   file:write("\n}")
   file:close() 
-end) 
+end
 
 mod:command("traits", "", function() 
+   mod.traits()
+end) 
+
+mod.traits = function() 
   local file = io.open(string.format("%s%s", out_dir, "traits.js"),"w+")
   file:write("export const traitData = {\n")
   for k,v in pairs(WeaponTraits.combinations) do 
@@ -305,12 +301,16 @@ mod:command("traits", "", function()
     file:write("\t\t},\n")
   end
   file:write("\n}")
-  file:close() 
-end) 
+  file:close()
+end
 
 
 -- Writes properties.js to desktop
 mod:command("properties", "", function() 
+  mod.properties()
+end)
+
+mod.properties = function() 
   local file = io.open(string.format("%s%s", out_dir, "properties.js"),"w+")
   file:write("export const propertiesData = {\n")
 
@@ -339,6 +339,14 @@ mod:command("properties", "", function()
   end
   file:write("\n]")
   file:close() 
+end
+
+mod:command("exportRanalds", "", function()
+  mod:echo("Exporting data to: %s", out_dir)
+  mod.heroes()
+  mod.weapons()
+  mod.traits() 
+  mod.properties()
 end)
   
 
