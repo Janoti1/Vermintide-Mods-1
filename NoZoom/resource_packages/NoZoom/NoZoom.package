@@ -1,0 +1,11 @@
+mod = [
+	"NoZoom"
+]
+
+package = [
+	"resource_packages/NoZoom/NoZoom"
+]
+
+lua = [
+	"scripts/mods/NoZoom/*"
+]
