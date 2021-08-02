@@ -16,6 +16,11 @@ return {
                 type = "checkbox",
                 default_value = false
             },
+            {
+                setting_id = "intensity",
+                type = "checkbox",
+                default_value = false
+            },
         }
     }
 }

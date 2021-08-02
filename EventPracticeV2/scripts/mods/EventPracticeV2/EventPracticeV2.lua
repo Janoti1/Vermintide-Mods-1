@@ -65,6 +65,27 @@ mod.update = function()
     end
 end
 
+mod:command("startFOWAtWave", "", function(wave)
+	if Managers.state.game_mode._level_key ~= "plaza" then 
+		mod:echo("[EventPractice]: Invalid level")
+		return
+	end
+	
+	local startWave = tonumber(wave)
+	if not startWave or startWave < 1 or startWave > 8 then
+		mod:echo("[EventPractice]: Invalid Wave Input (1-8)")
+		return
+	end
+
+	local adventure_spawning = Managers.state.game_mode:game_mode()._adventure_spawning 
+	if adventure_spawning._respawns_enabled then
+		adventure_spawning:set_respawning_enabled(false)
+	end
+
+	Managers.state.conflict:start_terror_event("plaza_wave_" .. wave)
+	
+end) 
+
 mod:command("getLocationData", "", function()
     local player_unit = Managers.player:local_player().player_unit
     local position = Unit.local_position(player_unit, 0)
@@ -100,6 +121,46 @@ function clearEvents()
 
     end
 end
+--20
+local triggerIndex = 1
+mod:command("toTrigger", "", function() 
+	mod:echo(triggerIndex)
+	local level_analysis = Managers.state.conflict.level_analysis
+    local boss_waypoints = level_analysis.boss_waypoints
+    local terror_spawners = level_analysis.terror_spawners
+    local enemy_recycler = level_analysis.enemy_recycler
+
+    if not boss_waypoints then return false end
+
+    local terror_event_kind = "event_boss"
+    local data = terror_spawners[terror_event_kind]
+    local spawners = data.spawners
+    local h = Vector3(0, 0, 1)
+	local spawner = spawners[triggerIndex]
+	local spawner_pos = Unit.local_position(spawner[1], 0)
+	local player_unit = Managers.player:local_player().player_unit
+	local rotation = Unit.local_rotation(player_unit, 0)
+	local locomotion_extension =
+		ScriptUnit.extension(player_unit, "locomotion_system")
+	locomotion_extension:teleport_to(spawner_pos, rotation)
+	triggerIndex = triggerIndex + 1
+
+
+    -- -- table.clear(enemy_recycler.main_path_events)
+
+    -- for i = 1, #spawners, 1 do
+    --     local spawner = spawners[i]
+
+    --     local spawner_pos = Unit.local_position(spawner[1], 0)
+    --     local boxed_pos = Vector3Box(spawner_pos)
+    --     local event_data = {event_kind = "event_boss"}
+
+    --     enemy_recycler:add_main_path_terror_event(boxed_pos,
+    --                                               "rare_event_loot_rat", 45,
+    --                                               event_data)
+
+    -- end
+end)
  
 mod:command("toevent", "", function()
     if not TABLE_CLEARED then 
@@ -374,14 +435,19 @@ mod:hook_safe(ConflictDirector, "update_horde_pacing", function(self, t, dt)
     if mod:get("pacing") then
         mod.debugPacing(t, dt)
     end
+	
+	if mod:get("intensity") then
+		mod.debugIntensity(t, dt)
+    end
 end)
-
+ 
+local font_size = 26
+local font_size_medium = 22
+local font_size_blackboard = 16
+local font = "arial"
+local font_mtrl = "materials/fonts/" .. font 
 mod.debugPacing = function(t, dt)
-    local font_size = 26
-    local font_size_medium = 22
-    local font_size_blackboard = 16
-    local font = "arial"
-    local font_mtrl = "materials/fonts/" .. font 
+    
 	local gui = mod.screen_gui
 	local cm = Managers.state.conflict
 	local res_x, res_y = Application.resolution()
@@ -484,4 +550,69 @@ mod.debugPacing = function(t, dt)
 	ScriptGUI.irect(gui, res_x, res_y, win_x, win_y, win_x + width, row, 2, Color(100, 10, 10, 10))
 end 
 
+mod.debugIntensity = function(t, dt) 
+	local xcol = {
+		Color(200, 160, 145, 0),
+		Color(200, 90, 150, 170),
+		Color(200, 10, 200, 100),
+		Color(200, 190, 50, 190)
+	}
+	local gui = mod.screen_gui
+	local res_x, res_y = Application.resolution()
+	local players = Managers.player:human_players()
+	local bar_width = 0.15
+	local bar_height = 0.02
+	local wedge = 0.0025
+	local win_x = 1 - (bar_width + wedge)
+	local win_y = 0.15
+	local row = win_y
+	local conflict_director = Managers.state.conflict
+	local pacing = conflict_director.pacing
+	local sum_pacing_intensity, player_intensity = pacing:get_pacing_intensity()
+
+	for k = 1, #player_intensity, 1 do
+		local int = player_intensity[k] * 0.01
+		local x1 = win_x
+		local y1 = row + bar_height
+		local x2 = win_x + bar_width * int
+		local y2 = row
+
+		ScriptGUI.irect(gui, res_x, res_y, x1, y1, win_x + bar_width, y2, 1, Color(100, 10, 10, 10))
+		ScriptGUI.irect(gui, res_x, res_y, x1, y1, x2, y2, 2, xcol[k])
+
+		row = row + bar_height + wedge
+	end
+
+	ScriptGUI.itext(gui, res_x, res_y, "[Player Intensity]", font_mtrl, font_size, font, win_x, win_y, 3, Color(255, 237, 237, 152))
+
+	row = row + bar_height * 1
+
+	ScriptGUI.itext(gui, res_x, res_y, "[Total Intensity]", font_mtrl, font_size, font, win_x, row + bar_height * 0.75, 3, Color(255, 237, 237, 152))
+
+	row = row + bar_height * 1
+
+	ScriptGUI.irect(gui, res_x, res_y, win_x, row + bar_height, win_x + bar_width, row, 1, Color(100, 90, 10, 10))
+	ScriptGUI.irect(gui, res_x, res_y, win_x, row + bar_height, win_x + bar_width * sum_pacing_intensity * 0.01, row, 2, Color(200, 130, 10, 10))
+
+	local decay_text = ""
+	local frozen = conflict_director:intensity_decay_frozen()
+
+	if frozen then
+		decay_text = string.format("decay delay frozen: %.1f", math.clamp(conflict_director.frozen_intensity_decay_until - t, 0, 100))
+	elseif pacing:ignore_pacing_intensity_decay_delay() then
+		decay_text = "decay delay: ignored"
+	else
+		local player = Managers.player:local_player(1)
+		local status_extension = ScriptUnit.has_extension(player.player_unit, "status_system")
+
+		if status_extension then
+		end
+	end
+
+	row = row + bar_height * 1.5
+	local small_font_size = 22
+
+	ScriptGUI.itext(gui, res_x, res_y, decay_text, font_mtrl, small_font_size, font, win_x, row + bar_height * 0.75, 3, Color(255, 200, 200, 32))
+
+end
 
