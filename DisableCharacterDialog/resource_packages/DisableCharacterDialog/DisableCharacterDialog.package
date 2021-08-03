@@ -1,0 +1,11 @@
+mod = [
+	"DisableCharacterDialog"
+]
+
+package = [
+	"resource_packages/DisableCharacterDialog/DisableCharacterDialog"
+]
+
+lua = [
+	"scripts/mods/DisableCharacterDialog/*"
+]
