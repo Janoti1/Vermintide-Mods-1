@@ -1,0 +1,11 @@
+mod = [
+	"grudgeBosses"
+]
+
+package = [
+	"resource_packages/grudgeBosses/grudgeBosses"
+]
+
+lua = [
+	"scripts/mods/grudgeBosses/*"
+]
