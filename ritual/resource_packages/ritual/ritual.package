@@ -1,0 +1,11 @@
+mod = [
+	"ritual"
+]
+
+package = [
+	"resource_packages/ritual/ritual"
+]
+
+lua = [
+	"scripts/mods/ritual/*"
+]
