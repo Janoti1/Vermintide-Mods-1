@@ -1,0 +1,64 @@
+local mod = get_mod("grudgeBosses")
+
+
+mod:hook(TerrorEventMixer.run_functions, "spawn", function (func, event, element, ...)
+  if event["data"]["event_kind"] == "event_boss" then
+    element["pre_spawn_func"] = TerrorEventUtils.add_enhancements_for_difficulty
+  end
+
+	return func(event, element, ...)
+end) 
+
+mod.on_game_state_changed = function(status, state)
+  if status == "enter" and state == "StateIngame" then
+      mod:dump(mod.enhancements, "copy", 4)
+      mod:dump(BreedEnhancements.boss, "original", 4)
+      BreedEnhancements.boss = {}
+      mod:dump(BreedEnhancements, "part", 4)
+      for name, data in pairs(mod.enhancements) do 
+        if not mod:get(name) then
+          BreedEnhancements.boss[name] = data
+        end
+      end
+      mod:dump(BreedEnhancements, "after", 4)
+  end
+end
+
+mod:hook(TerrorEventUtils, "generate_enhanced_breed", function(func, num_enhancements, breed_name)
+  mod:echo("called")
+  local status, response = pcall(func, ...)
+  mod:echo(status)
+  mod:echo(response)
+  if  status then 
+    mod:echo("no errors")
+    return response
+  else 
+    local list = {BreedEnhancements.base.base}
+	for name, data in pairs(BreedEnhancements.boss) do 
+        list[#list + 1] = data
+      end
+    return list
+  end
+  
+end)  
+
+-- mod:hook(ConflictDirector, "_post_spawn_unit", function(func, self, ai_unit, go_id, breed, spawn_pos, spawn_category, spawn_animation, optional_data, spawn_type)
+--   pcall(func(self, ai_unit, go_id, breed, spawn_pos, spawn_category, spawn_animation, optional_data, spawn_type)) 
+-- end)
+
+mod:hook(TerrorEventUtils, "apply_breed_enhancements", function(func, unit, breed, optional_data)
+  pcall(func, unit, breed, optional_data)
+end)
+ 
+mod:command("enhance", "", function()
+  mod.enhancements = {}
+  local boss_enhancements = BreedEnhancements.boss
+  for name, data in pairs(boss_enhancements) do
+		if not data.dummy_enhancement then
+			mod:echo(name)
+      mod:echo(Localize(data["display_name"]))
+      mod.enhancements[name] = data["display_name"]
+		end
+	end
+  mod:dump(mod.enhancements, "", 4)
+end)  
