@@ -113,8 +113,14 @@ mod:hook_safe(IngameHud, "update", function(self)
         mod:init()
         return
     end
-    local hudvisible = Managers.player:local_player().network_manager.matchmaking_manager._ingame_ui.ingame_hud._currently_visible_components ~= {}
-    if not hudvisible then return end  
+		
+    --local hudvisible = Managers.player:local_player().network_manager.matchmaking_manager._ingame_ui.ingame_hud._currently_visible_components ~= {}
+    --if not hudvisible then return end  
+		
+    if not self._currently_visible_components.EquipmentUI then 
+        return 
+    end	
+		
     local widget = mod.ui_widget
     local ui_renderer = mod.ui_renderer
     local ui_scenegraph = mod.ui_scenegraph
